@@ -1,0 +1,9 @@
+.text-operation-underline {
+    text-decoration: underline; 
+    font-weight: bold; 
+}
+
+.text-operation-highlight {
+    color: #FF8C00;
+    font-weight: bold; 
+}
