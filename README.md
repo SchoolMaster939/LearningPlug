@@ -1,1 +1,276 @@
 # LearningPlug
+
+# 🌳 知识树学习助手
+
+> 一个以「知识树」为核心的学习辅助系统，让 AI 成为真正了解你学习进度的专属老师。
+
+---
+
+## 📖 项目简介
+
+传统的 AI 对话工具是「一问一答」的线性模式，对话结束后知识也随之消散。本项目将 AI 对话与**结构化知识树**结合，让每一次提问都成为知识体系中一个可追溯、可复习、可扩展的节点。
+
+系统通过 MindElixir 渲染知识树，每个节点绑定独立的对话会话，并通过 LangChain / LangGraph 驱动智能体实现话题识别、工具调用、摘要生成等能力，最终形成一个「**边学边构建**」的个人知识库。
+
+---
+
+## ✨ 核心特性
+
+### 🌲 结构化知识树
+
+- **多根节点**：支持同时维护多个知识领域（如数学、编程、英语），互不干扰
+- **无限层级**：任意深度的父子结构，支持拖拽调整、节点重命名、节点移动
+- **独立会话**：每个节点绑定独立的对话会话，上下文完全隔离，避免"串台"
+- **悬浮预览**：鼠标悬停节点即可查看详情，支持钉住、拖拽、多窗口对比
+- **摘要与连线**：支持对子节点分组添加摘要，支持节点间自定义连线（先修/延伸/对比等关系）
+
+### 🤖 AI 智能体能力
+
+- **多轮对话**：基于 LangChain Agent 构建，支持工具调用
+- **工具生态**：
+  - 🔍 联网搜索（DuckDuckGo）
+  - 📊 Mermaid 思维导图生成
+  - 📐 GeoGebra 数学函数图生成
+  - 🌳 知识树路径查询（`get_path`）
+  - 📄 节点内容读取（`get_node_content`）
+- **话题自动识别**：每次对话结束后，异步判断是否涉及新主题，主动建议创建新节点
+- **人机协同**：涉及结构修改的操作走"提议 → 用户确认 → 执行"流程，用户始终掌控
+
+### 🧠 记忆管理
+
+- **短期记忆**：用户可自选携带的对话轮数（最近 N 轮 / 全部）
+- **增量摘要**：累计一定轮数后自动压缩历史，保留长期上下文
+- **路径注入**：自动注入当前节点的知识路径，让回答更贴合上下文
+
+### 💾 数据持久化
+
+- **SQLite**：存储知识树结构、摘要、连线
+- **JSON 文件**：存储对话会话，与原有聊天模式复用
+- **Redis**：持久化 LangGraph 工作流状态，支持中断恢复
+
+---
+
+## 🛠️ 技术栈
+
+| 层级 | 技术 |
+|------|------|
+| 前端框架 | Vite + TypeScript（原生 DOM 操作） |
+| 思维导图 | MindElixir |
+| 图表渲染 | Mermaid.js、GeoGebra |
+| 桌面容器 | pywebview |
+| 后端框架 | FastAPI |
+| 智能体 | LangChain + LangGraph |
+| 状态持久化 | Redis（LangGraph Checkpointer） |
+| 数据存储 | SQLite + JSON 文件 |
+| 向量检索 | （规划中） |
+
+---
+
+## 🏗️ 系统架构
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    前端 (Vite + TS)                     │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │
+│  │  MindElixir  │  │  对话面板     │  │  悬浮窗系统  │  │
+│  │  知识树渲染   │  │  SSE 流式输出 │  │  预览/钉住   │  │
+│  └──────────────┘  └──────────────┘  └──────────────┘  │
+└─────────────────────────────────────────────────────────┘
+                          ↕ HTTP / SSE
+┌─────────────────────────────────────────────────────────┐
+│                  后端 (FastAPI + Python)                 │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │
+│  │  节点 API    │  │  Agent 引擎  │  │  摘要服务    │  │
+│  │  摘要/箭头   │  │  LangGraph   │  │  增量生成    │  │
+│  └──────────────┘  └──────────────┘  └──────────────┘  │
+└─────────────────────────────────────────────────────────┘
+                          ↕
+┌─────────────────────────────────────────────────────────┐
+│   SQLite (知识树)  │  JSON (会话)  │  Redis (工作流)   │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🚀 快速开始
+
+### 环境要求
+
+- Python 3.11+
+- Node.js 18+
+- Redis（用于 LangGraph 状态持久化）
+
+### 安装
+
+```bash
+# 1. 克隆仓库
+git clone https://github.com/yourname/knowledge-tree-assistant.git
+cd knowledge-tree-assistant
+
+# 2. 安装后端依赖
+pip install -r requirements.txt
+
+# 3. 安装前端依赖
+cd frontend
+npm install
+
+# 4. 配置环境变量
+cp .env.example .env
+# 编辑 .env，填入 LLM API Key 等信息
+
+# 5. 启动 Redis
+redis-server
+
+# 6. 启动后端
+python main.py
+
+# 7. 启动前端（开发模式）
+npm run dev
+```
+
+### 打包为桌面应用
+
+```bash
+# 使用 pywebview 打包
+python build_desktop.py
+```
+
+---
+
+## 📚 使用指南
+
+### 创建知识树
+
+1. 点击左侧栏「+ 创建根节点」，输入知识领域名称（如「机器学习」）
+2. 在树中右键或悬浮节点，选择「添加子节点」创建细分知识点
+3. 拖拽节点调整层级，点击节点标题编辑名称
+
+### 对话交互
+
+1. 点击树中任意节点，右侧面板加载该节点的独立对话
+2. 输入问题并发送，AI 会基于当前节点上下文回答
+3. AI 回答支持 Markdown、Mermaid 图表、GeoGebra 交互式数学图
+
+### 话题自动识别
+
+1. 开启「话题自动识别」（设置中）
+2. 每次对话结束后，系统判断是否涉及新主题
+3. 如涉及，弹出确认框询问是否创建新节点
+4. 确认后自动创建节点、绑定新会话，并跳转到新节点
+
+### 悬浮窗预览
+
+- **节点悬浮**：鼠标悬停节点 500ms 后显示详情浮窗
+- **钉住**：点击 📌 按钮固定浮窗，可同时对比多个节点
+- **摘要/箭头悬浮**：悬停摘要或连线同样显示详情
+
+---
+
+## 📁 项目结构
+
+```
+knowledge-tree-assistant/
+├── backend/
+│   ├── main.py                    # FastAPI 主入口
+│   ├── db.py                      # SQLite 操作
+│   ├── storage.py                 # JSON 会话管理
+│   ├── llm.py                     # LLM 初始化
+│   ├── agent.py                   # Agent 构建
+│   ├── tools.py                   # 工具函数
+│   ├── summary_service.py         # 摘要生成服务
+│   ├── topic_judge.py             # 话题判断工作流
+│   ├── redis_checkpointer.py      # Redis 持久化
+│   └── models.py                  # Pydantic 模型
+│
+├── frontend/
+│   ├── src/
+│   │   ├── TreeMode/
+│   │   │   ├── index.ts           # TreeMode 主类
+│   │   │   ├── hover.ts           # 悬浮窗逻辑
+│   │   │   ├── operations.ts      # 操作处理器
+│   │   │   └── renderer.ts        # Mermaid/GeoGebra 渲染
+│   │   ├── api/
+│   │   │   └── treeApi.ts         # 后端 API 封装
+│   │   └── styles/
+│   └── index.html
+│
+├── data/
+│   ├── knowledge_tree.db          # SQLite 数据库
+│   ├── TreeModeConversations/     # 树状图会话
+│   └── conversations/             # 普通会话
+│
+└── README.md
+```
+
+---
+
+## 🗺️ 开发路线图
+
+### ✅ 已完成
+
+- [x] 知识树数据库设计（节点/摘要/箭头）
+- [x] 节点 CRUD、移动、重命名
+- [x] 摘要与连线 CRUD
+- [x] MindElixir 集成与渲染
+- [x] 节点独立会话绑定
+- [x] Agent 工具系统（搜索/Mermaid/路径查询）
+- [x] 话题自动判断工作流（LangGraph + Redis）
+- [x] 增量式会话摘要
+- [x] 节点/摘要/箭头悬浮窗
+- [x] 用户自选对话轮数
+- [x] SSE 流式输出与特殊事件分发
+
+### ⚠️ 进行中
+
+- [ ] 节点扩展属性持久化（样式/标签/图标/超链接）
+- [ ] 视图状态批量同步（折叠状态）
+
+### 📋 规划中
+
+- [ ] 知识树搜索 API 与 Agent 工具
+- [ ] 摘要/箭头 AI 解释
+- [ ] 自测与练习系统
+- [ ] 掌握度评估与间隔重复复习
+- [ ] PDF / Markdown 导入
+- [ ] 导出为 Markdown / Anki / PDF
+- [ ] 知识图谱网状视图
+- [ ] 学习路径规划（LangGraph）
+
+---
+
+## 🔒 隐私与安全
+
+- 所有数据本地存储，不上传云端
+- LLM 调用通过用户自配的 API Key 进行
+- 支持本地模型（通过 OpenAI 兼容接口）
+
+---
+
+## 🤝 贡献
+
+欢迎提交 Issue 和 Pull Request！
+
+1. Fork 本仓库
+2. 创建特性分支（`git checkout -b feature/AmazingFeature`）
+3. 提交改动（`git commit -m 'Add some AmazingFeature'`）
+4. 推送到分支（`git push origin feature/AmazingFeature`）
+5. 打开 Pull Request
+
+---
+
+## 📄 License
+
+本项目采用 MIT License，详见 [LICENSE](LICENSE) 文件。
+
+---
+
+## 🙏 致谢
+
+- [MindElixir](https://github.com/SSShooter/mind-elixir-core) - 强大的思维导图引擎
+- [LangChain](https://github.com/langchain-ai/langchain) / [LangGraph](https://github.com/langchain-ai/langgraph) - 智能体框架
+- [FastAPI](https://github.com/tiangolo/fastapi) - 高性能 Web 框架
+- [pywebview](https://github.com/r0x0r/pywebview) - 轻量级桌面容器
+
+---
+
+**⭐ 如果这个项目对你有帮助，请给一个 Star 支持一下！**
