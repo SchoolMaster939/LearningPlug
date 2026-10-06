@@ -166,44 +166,6 @@ python build_desktop.py
 
 ---
 
-## 📁 项目结构
-
-```
-knowledge-tree-assistant/
-├── backend/
-│   ├── main.py                    # FastAPI 主入口
-│   ├── db.py                      # SQLite 操作
-│   ├── storage.py                 # JSON 会话管理
-│   ├── llm.py                     # LLM 初始化
-│   ├── agent.py                   # Agent 构建
-│   ├── tools.py                   # 工具函数
-│   ├── summary_service.py         # 摘要生成服务
-│   ├── topic_judge.py             # 话题判断工作流
-│   ├── redis_checkpointer.py      # Redis 持久化
-│   └── models.py                  # Pydantic 模型
-│
-├── frontend/
-│   ├── src/
-│   │   ├── TreeMode/
-│   │   │   ├── index.ts           # TreeMode 主类
-│   │   │   ├── hover.ts           # 悬浮窗逻辑
-│   │   │   ├── operations.ts      # 操作处理器
-│   │   │   └── renderer.ts        # Mermaid/GeoGebra 渲染
-│   │   ├── api/
-│   │   │   └── treeApi.ts         # 后端 API 封装
-│   │   └── styles/
-│   └── index.html
-│
-├── data/
-│   ├── knowledge_tree.db          # SQLite 数据库
-│   ├── TreeModeConversations/     # 树状图会话
-│   └── conversations/             # 普通会话
-│
-└── README.md
-```
-
----
-
 ## 🗺️ 开发路线图
 
 ### ✅ 已完成
